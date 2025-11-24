@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken')
 const sendMail = require('../utils/sendMail')
 const crypto = require('crypto')
 const resetPasswordTemplate = require('../template/resetPassword');
+const otpRegister = require('../template/otpRegister');
 
 const register = asyncHandler(async (req, res) => {
     const { email, password, firstname, lastname, mobile } = req.body;
@@ -12,26 +13,145 @@ const register = asyncHandler(async (req, res) => {
     if (!email || !password || !lastname || !firstname || !mobile) {
         return res.status(400).json({
             success: false,
-            message: 'Vui lòng điền đầy đủ tất cả các thông tin cần thiết.',
-        })
+            mes: 'Không được để trống',
+        });
     }
 
     const user = await User.findOne({ email });
-    if (user) throw new Error('Email này đã được đăng ký. Vui lòng sử dụng email khác.');
+    if (user) throw new Error('Tài khoản đã tồn tại');
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     const newUser = await User.create({
         email,
         password,
         firstname,
         lastname,
-        mobile
-    })
+        mobile,
+        otp,
+        otpExpires: Date.now() + 5 * 60 * 1000,
+        isVerified: false,
+        otpRequestCount: 1,
+        lastOtpSentAt: Date.now(),
+    });
+
+    const html = otpRegister(otp);
+
+    await sendMail({
+        email,
+        html,
+        subject: 'Mã OTP đăng ký tài khoản',
+    });
 
     return res.json({
-        success: newUser ? true : false,
-        message: newUser ? 'Tạo tài khoản thành công, vui lòng kiểm tra email.' : 'Đã có lỗi xảy ra, vui lòng thử lại sau.',
-    })
-})
+        success: true,
+        mes: "OTP đã được gửi đến email của bạn",
+    });
+});
+
+const verifyOTP = asyncHandler(async (req, res) => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+        return res.status(400).json({
+            success: false,
+            mes: "Thiếu email hoặc OTP"
+        });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.json({
+            success: false,
+            mes: "Tài khoản không tồn tại"
+        });
+    }
+
+    if (user.otp !== otp) {
+        return res.json({
+            success: false,
+            mes: "OTP không đúng"
+        });
+    }
+    // console.log(user.otpExpires, Date.now());
+    if (user.otpExpires < Date.now()) {
+
+        return res.json({
+            success: false,
+            mes: "OTP đã hết hạn"
+        });
+    }
+
+    user.isVerified = true;
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    await user.save();
+
+    return res.json({
+        success: true,
+        mes: "Xác thực tài khoản thành công"
+    });
+});
+
+
+const resendOTP = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({
+            success: false,
+            mes: "Thiếu email"
+        });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.json({
+            success: false,
+            mes: "Tài khoản không tồn tại"
+        });
+    }
+
+    if (user.isVerified) {
+        return res.json({
+            success: false,
+            mes: "Tài khoản này đã được xác thực rồi"
+        });
+    }
+
+    if (user.otpRequestCount >= 3) {
+        return res.json({
+            success: false,
+            mes: "Bạn đã vượt quá số lần gửi OTP. Vui lòng thử lại sau hoặc đăng ký lại."
+        });
+    }
+
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otp = otp;
+    user.otpExpires = Date.now() + 5 * 60 * 1000;
+    user.otpRequestCount += 1;
+    user.lastOtpSentAt = Date.now();
+    await user.save();
+
+    const html = `
+        <h2>Mã OTP đăng ký mới:</h2>
+        <p style="font-size: 22px;"><b>${otp}</b></p>
+        <p>Mã có hiệu lực 5 phút</p>
+    `;
+
+    await sendMail({
+        email,
+        html,
+        subject: 'Mã OTP đăng ký (gửi lại)',
+    });
+
+    return res.json({
+        success: true,
+        mes: "OTP mới đã được gửi đến email của bạn",
+    });
+});
+
 
 
 const login = asyncHandler(async (req, res) => {
@@ -41,7 +161,7 @@ const login = asyncHandler(async (req, res) => {
     if (!email || !password)
         return res.status(400).json({
             success: false,
-            message: 'Vui lòng nhập đầy đủ email và mật khẩu.'
+            mes: 'Vui lòng nhập đầy đủ email và mật khẩu.'
         })
 
     const response = await User.findOne({ email })
@@ -57,7 +177,7 @@ const login = asyncHandler(async (req, res) => {
             userData
         })
     } else {
-        throw new Error('Đăng nhập thất bại. Email hoặc mật khẩu không chính xác.')
+        throw new Error('Email hoặc mật khẩu không chính xác.')
     }
 
 })
@@ -80,7 +200,7 @@ const logout = asyncHandler(async (req, res) => {
     res.clearCookie('refreshToken', { httpOnly: true })
     return res.status(200).json({
         success: true,
-        message: 'Đăng xuất thành công.'
+        mes: 'Đăng xuất thành công.'
     })
 })
 
@@ -115,7 +235,7 @@ const resetPassWord = asyncHandler(async (req, res) => {
     if (!password || !token) throw new Error('Vui lòng nhập đầy đủ mật khẩu và mã xác nhận.')
     const passwordResetToken = crypto.createHash('sha256').update(token).digest('hex')
     const user = await User.findOne({ passwordResetToken, passwordResetExpires: { $gt: Date.now() } })
-    if (!user) throw new Error('Mã đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.')
+    if (!user) throw new Error('Mã đặt lại mật khẩu hết hạn.')
     user.password = password
     user.passwordResetToken = undefined
     user.passwordChangedAt = Date.now()
@@ -137,10 +257,13 @@ const getCurrent = asyncHandler(async (req, res) => {
 })
 module.exports = {
     register,
+    verifyOTP,
+    resendOTP,
     login,
     refreshAccessToken,
     logout,
     forgotPassword,
     resetPassWord,
-    getCurrent
+    getCurrent,
+
 }

@@ -32,6 +32,23 @@ var userSchema = new mongoose.Schema({
     role: {
         type: String,
     },
+    otp: {
+        type: String,
+    },
+    otpExpires: {
+        type: Date,
+    },
+    isVerified: {
+        type: Boolean,
+        default: false,
+    },
+    otpRequestCount: {
+        type: Number,
+        default: 0,
+    },
+    lastOtpSentAt: {
+        type: Date,
+    },
     refreshToken: {
         type: String,
     },
@@ -43,10 +60,18 @@ var userSchema = new mongoose.Schema({
     },
     passwordResetExpires: {
         type: String
-    }
+    },
+
 }, {
     timestamps: true
 });
+userSchema.index(
+    { createdAt: 1 },
+    {
+        expireAfterSeconds: 5 * 60,
+        partialFilterExpression: { isVerified: false }
+    }
+);
 
 userSchema.pre('save', async function () {
     if (!this.isModified('password')) return;
