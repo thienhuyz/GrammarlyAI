@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import { Button, Sidebar } from "../../components";
-
+import { apiUploadDoc } from "../../apis";
+import { toast } from "react-toastify";
 import {
     PlusCircleIcon,
     ChevronDownIcon,
@@ -13,10 +14,22 @@ const Doc = () => {
     const fileInputRef = useRef(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-    const handleUpload = (e) => {
+    const handleUpload = async (e) => {
         const file = e.target.files[0];
-        console.log("File tải lên:", file);
+        if (!file) return;
+
+        const res = await apiUploadDoc(file);
+
+        if (!res?.success) {
+            toast.error(res?.mes || "Không thể đọc file");
+            return;
+        }
+
+        navigate("/editor", {
+            state: { initialText: res.content },
+        });
     };
+
 
     return (
         <div className="h-[calc(100vh-72px)] w-full flex bg-white text-slate-900">

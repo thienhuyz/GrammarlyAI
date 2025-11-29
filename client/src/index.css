@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+
+.ai-error {
+    background-color: #05bca7;
+    border-radius: 3px;
+    padding: 0 2px;
+    text-decoration: none;
+}

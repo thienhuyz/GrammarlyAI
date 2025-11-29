@@ -15,6 +15,10 @@ import {
     ArrowUturnRightIcon,
     PrinterIcon,
     ArrowDownOnSquareStackIcon,
+    DocumentDuplicateIcon,
+    ArrowDownOnSquareIcon,
+    ShieldCheckIcon
+
 } from "@heroicons/react/24/outline";
 
 export {
@@ -34,4 +38,7 @@ export {
     ArrowUturnRightIcon,
     PrinterIcon,
     ArrowDownOnSquareStackIcon,
+    DocumentDuplicateIcon,
+    ArrowDownOnSquareIcon,
+    ShieldCheckIcon
 };

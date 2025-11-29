@@ -61,7 +61,16 @@ var userSchema = new mongoose.Schema({
     passwordResetExpires: {
         type: String
     },
-
+    errorStats: {
+        grammar: {
+            type: Number,
+            default: 0,
+        },
+        word_choice: {
+            type: Number,
+            default: 0,
+        },
+    },
 }, {
     timestamps: true
 });

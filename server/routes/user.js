@@ -11,4 +11,7 @@ router.post('/refreshtoken', ctrls.refreshAccessToken)
 router.get('/logout', ctrls.logout)
 router.post('/forgotpassword', ctrls.forgotPassword)
 router.put('/resetpassword', ctrls.resetPassWord)
+router.put('/error-stats', verifyAccessToken, ctrls.updateErrorStats);
+router.put('/current', verifyAccessToken, ctrls.updateUser);
+
 module.exports = router

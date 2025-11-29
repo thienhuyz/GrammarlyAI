@@ -3,32 +3,27 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const Header = () => {
-
     const { isLoggedIn } = useSelector((state) => state.user);
 
     return (
         <header
-            className={`
-        w-full h-18 flex items-center justify-between px-12 bg-white fixed top-0 left-0 z-50
-        transition-all duration-300 shadow-[0_1px_4px_rgba(0,0,0,0.12)]
-    `}
-        >
-
-            {/* Left */}
-            <div className="flex items-center gap-2">
-                <img src={logo} className="w-12 h-12 object-contain" />
+            className="w-full h-18 flex items-center justify-between px-10 bg-[#F5FBFA] fixed top-0 left-0 z-50
+                transition-all duration-300 shadow-[0_2px_6px_rgba(1,106,94,0.15)] border-b border-[#D4ECE7]">
+            {/* Left: Logo + Brand */}
+            <div className="flex items-center gap-3">
+                <img src={logo} className="w-11 h-11 object-contain" alt="GrammarlyAI logo" />
                 <span className="text-2xl font-semibold tracking-tight text-[#016A5E]">
                     GrammarlyAI
                 </span>
             </div>
 
-            {/* Right */}
+            {/* Right: Auth buttons */}
             {!isLoggedIn && (
-                <div className="flex items-center gap-10 text-sm">
+                <div className="flex items-center gap-8 text-sm">
                     <Link
                         to="/login"
                         state={{ mode: "login" }}
-                        className="underline-offset-4 decoration-2 hover:underline text-base text-[#016A5E] font-bold cursor-pointer"
+                        className="underline-offset-4 decoration-2 hover:underline text-base text-[#016A5E] font-semibold cursor-pointer"
                     >
                         Đăng nhập
                     </Link>
@@ -36,8 +31,8 @@ const Header = () => {
                     <Link
                         to="/login"
                         state={{ mode: "register" }}
-                        className="px-4 py-1 rounded-full border-2 border-[#016A5E] font-bold text-base text-[#016A5E] hover:bg-[#016A5E] hover:text-white transition cursor-pointer"
-                    >
+                        className="px-5 py-1.5 rounded-full border-2 border-[#016A5E] font-semibold text-base text-[#016A5E] 
+                            hover:bg-[#016A5E] hover:text-white transition cursor-pointer">
                         Đăng ký
                     </Link>
                 </div>

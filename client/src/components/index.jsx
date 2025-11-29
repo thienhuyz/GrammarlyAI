@@ -6,4 +6,10 @@ export { default as Doc } from './home/Doc'
 export { default as InputField } from './login/InputField'
 export { default as Button } from './login/Button'
 export { default as OTPInput } from './login/OTPInput'
+export { default as CorrectedPanel } from './editor/CorrectedPanel'
+export { default as ErrorListPanel } from './editor/ErrorListPanel'
+export { default as InputArea } from './editor/InputArea'
+export { default as ProfileForm } from './profile/ProfileForm'
+export { default as ProfileHeader } from './profile/ProfileHeader'
+
 

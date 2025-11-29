@@ -255,6 +255,66 @@ const getCurrent = asyncHandler(async (req, res) => {
         rs: user ? user : 'Không tìm thấy người dùng.'
     })
 })
+
+const updateErrorStats = asyncHandler(async (req, res) => {
+    const { _id } = req.user; // lấy từ middleware verifyAccessToken
+    const { grammar = 0, word_choice = 0 } = req.body || {};
+
+    if (!grammar && !word_choice) {
+        return res.status(400).json({
+            success: false,
+            mes: 'Không có dữ liệu lỗi để cập nhật.',
+        });
+    }
+
+    const user = await User.findByIdAndUpdate(
+        _id,
+        {
+            $inc: {
+                'errorStats.grammar': grammar,
+                'errorStats.word_choice': word_choice,
+            },
+        },
+        { new: true }
+    ).select('-refreshToken -password');
+
+    return res.status(200).json({
+        success: user ? true : false,
+        rs: user || 'Không tìm thấy người dùng.',
+    });
+});
+
+const updateUser = asyncHandler(async (req, res) => {
+    const { _id } = req.user;
+
+    if (!_id) throw new Error("Missing user id");
+
+    const { firstname, lastname, mobile } = req.body;
+
+    const data = {};
+    if (firstname !== undefined) data.firstname = firstname;
+    if (lastname !== undefined) data.lastname = lastname;
+    if (mobile !== undefined) data.mobile = mobile;
+
+    if (Object.keys(data).length === 0) {
+        return res.status(400).json({
+            success: false,
+            mes: "Không có dữ liệu để cập nhật.",
+        });
+    }
+
+    const response = await User.findByIdAndUpdate(_id, data, {
+        new: true,
+    }).select("-password -refreshToken");
+
+    return res.status(200).json({
+        success: response ? true : false,
+        mes: response ? "Cập nhật thành công" : "Đã xảy ra lỗi",
+        rs: response || null,
+    });
+});
+
+
 module.exports = {
     register,
     verifyOTP,
@@ -265,5 +325,6 @@ module.exports = {
     forgotPassword,
     resetPassWord,
     getCurrent,
-
+    updateErrorStats,
+    updateUser,
 }

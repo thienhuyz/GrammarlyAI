@@ -46,5 +46,14 @@ export const apiLogout = () => axios({
     method: 'get',
 });
 
+export const apiUpdateErrorStats = (data) => axios({
+    url: '/user/error-stats',
+    method: 'put',
+    data,
+});
 
-
+export const apiUpdateCurrent = (data) => axios({
+    url: '/user/current',
+    method: 'put',
+    data,
+});
