@@ -27,7 +27,7 @@ const checkGrammar = asyncHandler(async (req, res) => {
                     "Return ONLY valid JSON (no markdown, no backticks).",
                     "Return ONLY the minimal incorrect word or segment in each correction.",
 
-                    // loại lỗi duy nhất
+                    // loại lỗi
                     "For each correction, add a 'type' field that is one of: \"grammar\", \"word_choice\".",
 
                     "For each correction, add a short 'explanation'.",

@@ -134,11 +134,8 @@ const resendOTP = asyncHandler(async (req, res) => {
     user.lastOtpSentAt = Date.now();
     await user.save();
 
-    const html = `
-        <h2>Mã OTP đăng ký mới:</h2>
-        <p style="font-size: 22px;"><b>${otp}</b></p>
-        <p>Mã có hiệu lực 5 phút</p>
-    `;
+    const html = otpRegister(otp);
+
 
     await sendMail({
         email,
@@ -314,6 +311,89 @@ const updateUser = asyncHandler(async (req, res) => {
     });
 });
 
+const getUsers = asyncHandler(async (req, res) => {
+    const page = +req.query.page || 1;
+    const limit = +req.query.limit || 10;
+    const name = req.query.name?.trim() || "";
+    const sort = req.query.sort || "-createdAt";
+
+    const formattedQueries = {};
+
+    if (name) {
+        formattedQueries.$or = [
+            { firstname: { $regex: name, $options: "i" } },
+            { lastname: { $regex: name, $options: "i" } },
+            { email: { $regex: name, $options: "i" } },
+        ];
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [users, counts] = await Promise.all([
+        User.find(formattedQueries)
+            .sort(sort)
+            .select("-password -refreshToken")
+            .skip(skip)
+            .limit(limit)
+            .exec(),
+        User.countDocuments(formattedQueries),
+    ]);
+
+    return res.status(200).json({
+        success: true,
+        counts,
+        users,
+    });
+});
+
+
+const updateUserByAdmin = asyncHandler(async (req, res) => {
+    const { uid } = req.params;
+    if (!uid) throw new Error("Thiếu ID người dùng");
+
+
+    if (!Object.keys(req.body).length)
+        throw new Error("Không có dữ liệu để cập nhật");
+
+    const ALLOW = ["firstname", "lastname", "email", "mobile", "role"];
+    const dataUpdate = {};
+
+    for (const key of ALLOW) {
+        if (req.body[key] !== undefined) {
+            dataUpdate[key] = req.body[key];
+        }
+    }
+
+    if (!Object.keys(dataUpdate).length)
+        throw new Error("Không có trường hợp lệ để cập nhật");
+
+    const user = await User.findByIdAndUpdate(uid, dataUpdate, {
+        new: true,
+    }).select("-password -refreshToken");
+
+    return res.status(200).json({
+        success: !!user,
+        user: user || null,
+        mes: user ? "Cập nhật người dùng thành công" : "Không tìm thấy người dùng",
+    });
+});
+
+
+const deleteUser = asyncHandler(async (req, res) => {
+    const { uid } = req.params;
+    if (!uid) throw new Error('Missing user id');
+
+    const response = await User.findByIdAndDelete(uid);
+
+    return res.status(200).json({
+        success: !!response,
+        mes: response
+            ? `User with email ${response.email} deleted`
+            : 'No user deleted'
+    });
+});
+
+
 
 module.exports = {
     register,
@@ -327,4 +407,7 @@ module.exports = {
     getCurrent,
     updateErrorStats,
     updateUser,
+    getUsers,
+    updateUserByAdmin,
+    deleteUser,
 }

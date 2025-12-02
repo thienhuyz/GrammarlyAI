@@ -57,3 +57,23 @@ export const apiUpdateCurrent = (data) => axios({
     method: 'put',
     data,
 });
+
+export const apiAdminGetUsers = (params) =>
+    axios({
+        url: '/user/admin/users',
+        method: 'get',
+        params,
+    });
+
+export const apiAdminUpdateUser = (uid, data) =>
+    axios({
+        url: `/user/admin/users/${uid}`,
+        method: 'put',
+        data,
+    });
+
+export const apiAdminDeleteUser = (uid) =>
+    axios({
+        url: `/user/admin/users/${uid}`,
+        method: 'delete',
+    });

@@ -7,3 +7,11 @@
     padding: 0 2px;
     text-decoration: none;
 }
+
+.table-center .ant-table-cell {
+    text-align: center !important;
+}
+
+.table-center .ant-table-thead>tr>th {
+    text-align: center !important;
+}
