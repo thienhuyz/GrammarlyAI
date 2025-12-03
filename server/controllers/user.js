@@ -381,15 +381,38 @@ const updateUserByAdmin = asyncHandler(async (req, res) => {
 
 const deleteUser = asyncHandler(async (req, res) => {
     const { uid } = req.params;
-    if (!uid) throw new Error('Missing user id');
+    if (!uid) throw new Error("Thiếu ID người dùng");
 
     const response = await User.findByIdAndDelete(uid);
 
     return res.status(200).json({
         success: !!response,
         mes: response
-            ? `User with email ${response.email} deleted`
-            : 'No user deleted'
+            ? `Đã xóa người dùng có email: ${response.email}`
+            : "Không tìm thấy người dùng để xóa",
+    });
+});
+
+// Thống kê tổng số lỗi grammar & word_choice của toàn bộ user
+const getErrorStats = asyncHandler(async (req, res) => {
+    const stats = await User.aggregate([
+        {
+            $group: {
+                _id: null,
+                totalGrammar: { $sum: "$errorStats.grammar" },
+                totalWordChoice: { $sum: "$errorStats.word_choice" },
+            },
+        },
+    ]);
+
+    const { totalGrammar = 0, totalWordChoice = 0 } = stats[0] || {};
+
+    return res.status(200).json({
+        success: true,
+        data: {
+            totalGrammar,
+            totalWordChoice,
+        },
     });
 });
 
@@ -410,4 +433,5 @@ module.exports = {
     getUsers,
     updateUserByAdmin,
     deleteUser,
+    getErrorStats,
 }

@@ -17,5 +17,5 @@ router.put('/current', verifyAccessToken, ctrls.updateUser);
 router.get('/admin/users', verifyAccessToken, isAdmin, ctrls.getUsers);
 router.put('/admin/users/:uid', verifyAccessToken, isAdmin, ctrls.updateUserByAdmin);
 router.delete('/admin/users/:uid', verifyAccessToken, isAdmin, ctrls.deleteUser);
-
+router.get("/admin/stats/errors", verifyAccessToken, isAdmin, ctrls.getErrorStats);
 module.exports = router

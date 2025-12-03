@@ -29,18 +29,22 @@ const checkGrammar = asyncHandler(async (req, res) => {
 
                     // loại lỗi
                     "For each correction, add a 'type' field that is one of: \"grammar\", \"word_choice\".",
-
                     "For each correction, add a short 'explanation'.",
 
-                    //Format JSON 
-                    'JSON format: { "corrected": "...", "corrections": [ { "original": "...", "correct": "...", "type": "...", "explanation": "..." } ], "highlighted_html": "..." }',
+                    // Format JSON – ĐÃ ĐỔI
+                    'JSON format: { "corrected": "...", "corrections": [ { "original": "...", "correct": "...", "type": "...", "explanation": "..." } ], "highlighted_html": "...", "corrected_highlighted_html": "..." }',
 
-                    // highlight
+                    // highlight bản gốc
                     "In 'highlighted_html', return the ORIGINAL text, but wrap each minimal incorrect word or segment in <span class=\"ai-error\">...</span>.",
-                    "Do NOT change any correct word.",
-                    "Do NOT fix the errors inside highlighted_html; only wrap them.",
+                    "Do NOT change any correct word in 'highlighted_html'.",
+                    "Do NOT fix the errors inside 'highlighted_html'; only wrap them.",
                     "Preserve all line breaks, spacing, and numbering exactly using \\n.",
-                    "If there are no errors, set 'corrections' to an empty array and 'highlighted_html' equal to the original text."
+
+                    // highlight bản đã chỉnh sửa
+                    "In 'corrected_highlighted_html', return the FULLY CORRECTED text.",
+                    "In 'corrected_highlighted_html', wrap each corrected word or segment in <span class=\"ai-correct\">...</span>.",
+                    "If there are no errors, set 'corrections' to an empty array, 'highlighted_html' equal to the original text, and 'corrected_highlighted_html' equal to the original text.",
+
                 ].join(" ")
             },
             {

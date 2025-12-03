@@ -64,8 +64,11 @@ const CorrectedPanel = ({
                 {/* Nội dung câu đã chỉnh sửa / placeholder */}
                 <div className="flex-1 overflow-y-auto">
                     {aiResult && !loading && !error ? (
-                        <p className="text-base font-medium text-justify whitespace-pre-wrap text-slate-800">
-                            {aiResult.corrected}
+                        <p className="text-lg  text-justify whitespace-pre-wrap text-slate-800">
+                            <div
+                                dangerouslySetInnerHTML={{ __html: aiResult.corrected_highlighted_html }}
+                            />
+
                         </p>
                     ) : (
                         <div className="h-full flex items-center justify-center text-sm text-slate-500">

@@ -17,7 +17,9 @@ import {
     ArrowDownOnSquareStackIcon,
     DocumentDuplicateIcon,
     ArrowDownOnSquareIcon,
-    ShieldCheckIcon
+    ShieldCheckIcon,
+    PhoneIcon,
+    EnvelopeIcon
 
 } from "@heroicons/react/24/outline";
 
@@ -40,5 +42,7 @@ export {
     ArrowDownOnSquareStackIcon,
     DocumentDuplicateIcon,
     ArrowDownOnSquareIcon,
-    ShieldCheckIcon
+    ShieldCheckIcon,
+    PhoneIcon,
+    EnvelopeIcon
 };

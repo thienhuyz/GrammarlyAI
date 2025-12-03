@@ -1,13 +1,9 @@
 import {
-    DocumentTextIcon,
-    UserIcon,
-    QuestionMarkCircleIcon,
-    PowerIcon,
-    ChevronLeftIcon,
-    ChevronRightIcon,
+    DocumentTextIcon, UserIcon, QuestionMarkCircleIcon,
+    PowerIcon, ChevronLeftIcon, ChevronRightIcon, PhoneIcon, EnvelopeIcon
 } from "../../utils/icon";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -33,6 +29,8 @@ const Sidebar = ({ isOpen, onToggle }) => {
     }, [token, dispatch]);
 
     const userEmail = current?.email;
+    const isAdmin = current?.role === "admin";
+    const [showSupport, setShowSupport] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -60,7 +58,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
             <button
                 onClick={onToggle}
                 className="absolute -right-5 top-4 h-9 w-9 rounded-full border border-[#D4ECE7] bg-white
-                    flex items-center justify-center shadow-sm hover:bg-[#F5FBFA] transition "
+                    flex items-center justify-center shadow-sm hover:bg-[#F5FBFA] transition cursor-pointer"
             >
                 {isOpen ? (
                     <ChevronLeftIcon className="h-5 w-5 text-[#016A5E]" />
@@ -95,6 +93,18 @@ const Sidebar = ({ isOpen, onToggle }) => {
                     <UserIcon className="h-5 w-5 text-[#016A5E]" />
                     {isOpen && <span>Tài khoản</span>}
                 </div>
+                {isAdmin && (
+                    <div
+                        onClick={() => navigate(`/${path.ADMIN}`)}
+                        className={`
+                            ${baseItemClass} ${itemHoverClass}
+                            ${isOpen ? "px-3" : "px-0 justify-center"}
+                        `}
+                    >
+                        <DocumentTextIcon className="h-5 w-5 text-[#016A5E]" />
+                        {isOpen && <span>Trang admin</span>}
+                    </div>
+                )}
             </nav>
 
             {/* Menu dưới */}
@@ -102,15 +112,30 @@ const Sidebar = ({ isOpen, onToggle }) => {
 
                 {/* HỖ TRỢ */}
                 <div
-                    onClick={() => navigate("/support")}     // Bạn có thể sửa path này
-                    className={`
-                        ${baseItemClass} ${itemHoverClass}
-                        ${isOpen ? "px-3" : "px-0 justify-center"}
-                    `}
+                    onClick={() => setShowSupport(!showSupport)}
+                    className={`${baseItemClass} ${itemHoverClass} ${isOpen ? "px-3" : "px-0 justify-center"
+                        }`}
                 >
                     <QuestionMarkCircleIcon className="h-5 w-5 text-[#016A5E]" />
                     {isOpen && <span>Hỗ trợ</span>}
                 </div>
+
+                {showSupport && isOpen && (
+                    <div className="mt-1 bg-white border border-[#D4ECE7] rounded-lg p-3 shadow text-sm text-[#016A5E] space-y-2">
+
+                        <div className="flex items-center gap-2">
+                            <PhoneIcon className="h-4 w-4 text-[#016A5E]" />
+                            <span>0900 123 456</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <EnvelopeIcon className="h-4 w-4 text-[#016A5E]" />
+                            <span>support@gmail.com</span>
+                        </div>
+
+                    </div>
+                )}
+
 
                 {/* ĐĂNG XUẤT */}
                 <div
@@ -131,6 +156,8 @@ const Sidebar = ({ isOpen, onToggle }) => {
 
             </div>
         </aside>
+
+
     );
 };
 

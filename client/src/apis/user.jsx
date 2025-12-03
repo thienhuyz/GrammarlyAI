@@ -77,3 +77,9 @@ export const apiAdminDeleteUser = (uid) =>
         url: `/user/admin/users/${uid}`,
         method: 'delete',
     });
+
+export const apiAdminGetErrorStats = () =>
+    axios({
+        url: "/user/admin/stats/errors",
+        method: "get",
+    });
