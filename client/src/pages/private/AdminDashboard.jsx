@@ -177,7 +177,7 @@ const AdminDashboard = () => {
                                 title="Tỷ lệ các loại lỗi (%)"
                                 className="shadow-sm rounded-2xl"
                             >
-                                <div className="w-full h-[320px] flex flex-col lg:flex-row items-center justify-between gap-4">
+                                <div className="w-full h-80 flex flex-col lg:flex-row items-center justify-between gap-4">
                                     {totalErrors === 0 ? (
                                         <span className="text-slate-500 text-sm">
                                             Chưa có dữ liệu để hiển thị biểu đồ.
@@ -289,7 +289,7 @@ const AdminDashboard = () => {
                                 title="Xu hướng yêu cầu sửa lỗi theo ngày (demo)"
                                 className="shadow-sm rounded-2xl"
                             >
-                                <div className="w-full h-[320px]">
+                                <div className="w-full h-80">
                                     <ResponsiveContainer
                                         width="100%"
                                         height="100%"

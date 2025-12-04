@@ -8,6 +8,7 @@ const path = {
     ADMIN: 'admin',
     USER_MANAGEMENT: 'users',
     DASHBOARD: '',
+    HISTORY: 'history',
 };
 
 export default path;

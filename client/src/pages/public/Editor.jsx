@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Sidebar } from "../../components";
 import path from "../../utils/path";
-import { apiCheckGrammar, apiUpdateErrorStats } from "../../apis";
+import { apiCheckGrammar, apiUpdateErrorStats, apiSaveWritingHistory, } from "../../apis";
 import { toast } from "react-toastify";
 import { InputArea, CorrectedPanel, ErrorListPanel } from "../../components";
 import jsPDF from "jspdf";
@@ -103,9 +103,33 @@ const Editor = () => {
             const corrections = data?.corrections || [];
             const { grammar, word_choice } = countErrorsByType(corrections);
 
+            try {
+                const wordCountValue = getWordCount(text);
+                const totalErrors = corrections.length;
+
+                await apiSaveWritingHistory({
+                    originalText: text,
+                    correctedText: data.corrected,
+
+                    originalHighlightedHtml: data.highlighted_html,
+                    correctedHighlightedHtml: data.corrected_highlighted_html,
+
+                    corrections,
+                    totalErrors,
+                    grammarErrors: grammar,
+                    wordChoiceErrors: word_choice,
+                    wordCount: wordCountValue,
+                });
+            } catch (err) {
+                console.log("Không lưu được lịch sử viết:", err?.message);
+            }
+
             if (grammar > 0 || word_choice > 0) {
                 try {
-                    const updateRes = await apiUpdateErrorStats({ grammar, word_choice });
+                    const updateRes = await apiUpdateErrorStats({
+                        grammar,
+                        word_choice,
+                    });
                     if (updateRes?.success) {
                         dispatch(getCurrent());
                     }

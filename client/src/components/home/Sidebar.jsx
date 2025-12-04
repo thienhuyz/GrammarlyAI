@@ -93,6 +93,18 @@ const Sidebar = ({ isOpen, onToggle }) => {
                     <UserIcon className="h-5 w-5 text-[#016A5E]" />
                     {isOpen && <span>Tài khoản</span>}
                 </div>
+
+                <div
+                    onClick={() => navigate(`/${path.HISTORY}`)}
+                    className={`
+        ${baseItemClass} ${itemHoverClass}
+        ${isOpen ? "px-3" : "px-0 justify-center"}
+    `}
+                >
+                    <DocumentTextIcon className="h-5 w-5 text-[#016A5E]" />
+                    {isOpen && <span>Lịch sử</span>}
+                </div>
+
                 {isAdmin && (
                     <div
                         onClick={() => navigate(`/${path.ADMIN}`)}
