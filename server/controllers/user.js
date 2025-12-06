@@ -393,7 +393,6 @@ const deleteUser = asyncHandler(async (req, res) => {
     });
 });
 
-// Thống kê tổng số lỗi grammar & word_choice của toàn bộ user
 const getErrorStats = asyncHandler(async (req, res) => {
     const stats = await User.aggregate([
         {
