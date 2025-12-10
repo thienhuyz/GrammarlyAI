@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import path from "../utils/path";
 
-import { Public, Home, Login, ResetPassword, Editor, Profile, History } from "../pages/public";
+import { Public, Home, Login, ResetPassword, Editor, Profile, History, Pricing, MomoReturn } from "../pages/public";
 import { AdminLayout, AdminUsers, AdminDashboard } from "../pages/private";
 
 const AppRoutes = () => {
@@ -15,6 +15,8 @@ const AppRoutes = () => {
             </Route>
             <Route path={path.LOGIN} element={<Login />} />
             <Route path={path.RESET_PASSWORD} element={<ResetPassword />} />
+            <Route path={path.PRICING} element={<Pricing />} />
+            <Route path={path.MOMO_RETURN} element={<MomoReturn />} />
 
             <Route path={path.ADMIN} element={<AdminLayout />}>
                 <Route path={path.DASHBOARD} element={<AdminDashboard />} />

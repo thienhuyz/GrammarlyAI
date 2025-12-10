@@ -1,6 +1,6 @@
 import {
-    DocumentTextIcon, UserIcon, QuestionMarkCircleIcon,
-    PowerIcon, ChevronLeftIcon, ChevronRightIcon, PhoneIcon, EnvelopeIcon
+    DocumentTextIcon, UserIcon, QuestionMarkCircleIcon, PowerIcon,
+    ChevronLeftIcon, ChevronRightIcon, PhoneIcon, EnvelopeIcon, LockClosedIcon
 } from "../../utils/icon";
 
 import { useEffect, useState } from "react";
@@ -11,6 +11,7 @@ import { getCurrent } from "../../store/asyncActions";
 import { logout } from "../../store/userSlice";
 import { apiLogout } from "../../apis";
 import path from "../../utils/path";
+import { toast } from "react-toastify";
 
 const Sidebar = ({ isOpen, onToggle }) => {
     const baseItemClass =
@@ -21,6 +22,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
     const navigate = useNavigate();
 
     const { current, token } = useSelector((state) => state.user);
+    const isPro = current?.plan === "pro";
 
     useEffect(() => {
         if (token) {
@@ -95,15 +97,40 @@ const Sidebar = ({ isOpen, onToggle }) => {
                 </div>
 
                 <div
-                    onClick={() => navigate(`/${path.HISTORY}`)}
+                    onClick={() => {
+                        if (!isPro) {
+
+
+                            navigate(`/${path.PRICING}`);
+
+                            toast.info("Vui lòng nâng cấp Pro để sử dụng tính năng xem lịch sử.", {
+                                position: "top-right",
+                                autoClose: 3000,
+                            });
+
+
+                            return;
+                        }
+
+                        navigate(`/${path.HISTORY}`);
+                    }}
                     className={`
         ${baseItemClass} ${itemHoverClass}
         ${isOpen ? "px-3" : "px-0 justify-center"}
+        ${!isPro ? "opacity-80" : ""}
     `}
                 >
                     <DocumentTextIcon className="h-5 w-5 text-[#016A5E]" />
-                    {isOpen && <span>Lịch sử</span>}
+                    {isOpen && (
+                        <span className="flex items-center gap-2">
+                            Lịch sử
+                            {!isPro && (
+                                <LockClosedIcon className="h-4 w-4 text-[#016A5E]" />
+                            )}
+                        </span>
+                    )}
                 </div>
+
 
                 {isAdmin && (
                     <div

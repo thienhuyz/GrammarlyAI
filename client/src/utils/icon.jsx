@@ -19,8 +19,8 @@ import {
     ArrowDownOnSquareIcon,
     ShieldCheckIcon,
     PhoneIcon,
-    EnvelopeIcon
-
+    EnvelopeIcon,
+    LockClosedIcon
 } from "@heroicons/react/24/outline";
 
 export {
@@ -44,5 +44,6 @@ export {
     ArrowDownOnSquareIcon,
     ShieldCheckIcon,
     PhoneIcon,
-    EnvelopeIcon
+    EnvelopeIcon,
+    LockClosedIcon
 };

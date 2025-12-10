@@ -1,19 +1,23 @@
 import { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Sidebar } from "../../components";
 import path from "../../utils/path";
-import { apiCheckGrammar, apiUpdateErrorStats, apiSaveWritingHistory, } from "../../apis";
+import {
+    apiCheckGrammar,
+    apiUpdateErrorStats,
+    apiSaveWritingHistory,
+} from "../../apis";
 import { toast } from "react-toastify";
 import { InputArea, CorrectedPanel, ErrorListPanel } from "../../components";
 import jsPDF from "jspdf";
-import { useDispatch } from "react-redux";
 import { getCurrent } from "../../store/asyncActions";
 
 const TYPE_LABELS = {
     grammar: "Ngữ pháp",
     word_choice: "Từ vựng",
 };
+
 const countErrorsByType = (corrections = []) => {
     let grammar = 0;
     let word_choice = 0;
@@ -25,12 +29,17 @@ const countErrorsByType = (corrections = []) => {
 
     return { grammar, word_choice };
 };
+
+const MAX_FREE_USES = 5;
+
 const Editor = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     const navigate = useNavigate();
-    const location = useLocation();
-    const { isLoggedIn } = useSelector((state) => state.user);
+    const dispatch = useDispatch();
+
+    const { isLoggedIn, current } = useSelector((state) => state.user);
+    const isPro = current?.plan === "pro";
 
     const [text, setText] = useState("");
     const [aiResult, setAiResult] = useState(null);
@@ -38,9 +47,10 @@ const Editor = () => {
     const [error, setError] = useState("");
     const [selectedIndex, setSelectedIndex] = useState(null);
 
-    const MAX_WORDS = 200;
+    const [usageCount, setUsageCount] = useState(0);
+
     const editorRef = useRef(null);
-    const dispatch = useDispatch();
+
     useEffect(() => {
         if (!isLoggedIn) {
             navigate(`/${path.HOME}`);
@@ -48,29 +58,11 @@ const Editor = () => {
     }, [isLoggedIn, navigate]);
 
     useEffect(() => {
-        const initialText = location.state?.initialText;
-        if (!initialText) return;
-
-        const words = initialText.trim().split(/\s+/);
-        let finalText = initialText;
-
-        if (words.length > MAX_WORDS) {
-            const limited = words.slice(0, MAX_WORDS).join(" ");
-
-            toast.warn(`Nội dung ban đầu vượt quá ${MAX_WORDS} từ, đã cắt bớt.`, {
-                position: "top-right",
-                autoClose: 2000,
-            });
-
-            finalText = limited;
+        if (!isPro) {
+            const countFromServer = current?.dailyUsage?.count || 0;
+            setUsageCount(countFromServer);
         }
-
-        setText(finalText);
-
-        if (editorRef.current) {
-            editorRef.current.innerHTML = finalText.replace(/\n/g, "<br/>");
-        }
-    }, [location.state?.initialText]);
+    }, [current, isPro]);
 
 
     const getWordCount = (value) => {
@@ -83,6 +75,27 @@ const Editor = () => {
 
     // Ngữ pháp
     const handleCheckGrammar = async () => {
+        if (!text || !text.trim()) {
+            const msg = "Vui lòng nhập đoạn văn trước khi kiểm tra.";
+            setError(msg);
+            toast.warn(msg, {
+                position: "top-right",
+                autoClose: 2000,
+            });
+            return;
+        }
+
+        if (!isPro && usageCount >= MAX_FREE_USES) {
+            const msg =
+                "Bạn đã dùng hết 5 lượt kiểm tra miễn phí hôm nay. Vui lòng quay lại vào ngày mai hoặc nâng cấp gói Pro để sử dụng không giới hạn.";
+            setError(msg);
+            toast.warn(msg, {
+                position: "top-right",
+                autoClose: 3000,
+            });
+            return;
+        }
+
         try {
             setLoading(true);
             setError("");
@@ -103,22 +116,19 @@ const Editor = () => {
             const corrections = data?.corrections || [];
             const { grammar, word_choice } = countErrorsByType(corrections);
 
+            // lưu lịch sử viết
             try {
-                const wordCountValue = getWordCount(text);
                 const totalErrors = corrections.length;
-
                 await apiSaveWritingHistory({
                     originalText: text,
                     correctedText: data.corrected,
-
                     originalHighlightedHtml: data.highlighted_html,
                     correctedHighlightedHtml: data.corrected_highlighted_html,
-
                     corrections,
                     totalErrors,
                     grammarErrors: grammar,
                     wordChoiceErrors: word_choice,
-                    wordCount: wordCountValue,
+                    wordCount,
                 });
             } catch (err) {
                 console.log("Không lưu được lịch sử viết:", err?.message);
@@ -137,6 +147,7 @@ const Editor = () => {
                     console.log("Không cập nhật thống kê lỗi:", err.message);
                 }
             }
+
         } catch (err) {
             const msg = err?.message || "Đã xảy ra lỗi khi kiểm tra ngữ pháp.";
             setError(msg);
@@ -148,7 +159,6 @@ const Editor = () => {
             setLoading(false);
         }
     };
-
 
     // Xóa 
     const handleClear = () => {
@@ -202,15 +212,13 @@ const Editor = () => {
         const lines = doc.splitTextToSize(corrected, maxWidth);
 
         doc.text(lines, marginLeft, marginTop);
-        doc.save("corrected-text.pdf");
+        doc.save("corrected.pdf");
 
         toast.success("Đã tải xuống file PDF!", {
             position: "top-right",
             autoClose: 2000,
         });
     };
-
-
 
     return (
         <div className="h-[calc(100vh-72px)] w-full flex bg-[#E6F4F1] text-slate-900">
@@ -222,16 +230,17 @@ const Editor = () => {
             <main className="flex-1 flex overflow-hidden">
                 <div className="flex-1 flex flex-col min-h-0">
                     <div className="flex-1 flex bg-[#F5FBFA] border-l border-t border-[#B8E0DB] rounded-tr-2xl rounded-b-2xl shadow-sm min-h-0">
-
                         {/* LEFT */}
                         <div className="flex-1 flex flex-col border-r border-[#C7E5DF] py-4 px-8 min-h-0">
                             <div className="flex-1 flex flex-col gap-4 min-h-0">
                                 <InputArea
                                     text={text}
                                     setText={setText}
-                                    wordCount={wordCount}
                                     aiResult={aiResult}
                                     editorRef={editorRef}
+                                    isPro={isPro}
+                                    usageCount={usageCount}
+                                    maxFreeUses={MAX_FREE_USES}
                                 />
 
                                 <CorrectedPanel

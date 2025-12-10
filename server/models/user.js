@@ -73,6 +73,25 @@ var userSchema = new mongoose.Schema({
             default: 0,
         },
     },
+    plan: {
+        type: String,
+        enum: ['free', 'pro'],
+        default: 'free'
+    },
+    proExpiresAt: {
+        type: Date,
+        default: null
+    },
+    dailyUsage: {
+        date: {
+            type: Date,
+            default: null
+        },
+        count: {
+            type: Number,
+            default: 0
+        }
+    }
 }, {
     timestamps: true
 });

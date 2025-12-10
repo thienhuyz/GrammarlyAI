@@ -118,7 +118,7 @@ const Profile = () => {
             <main className="flex-1 flex overflow-hidden">
                 <div className="flex-1 flex flex-col min-h-0">
                     <div className="flex-1 flex bg-[#F5FBFA] border-l border-t border-[#B8E0DB] rounded-tr-2xl rounded-b-2xl shadow-sm min-h-0 py-6 md:py-8">
-                        <div className="w-full max-w-3xl mx-auto px-4">
+                        <div className="w-full max-w-4xl mx-auto px-4">
                             <section className="w-full bg-white/80 border border-[#C7E5DF] rounded-2xl shadow-sm p-6 md:p-8 flex flex-col gap-6">
 
                                 <ProfileHeader
@@ -129,7 +129,11 @@ const Profile = () => {
                                     mobile={current?.mobile}
                                     grammarCount={grammarCount}
                                     wordChoiceCount={wordChoiceCount}
+                                    plan={current?.plan}
+                                    proExpiresAt={current?.proExpiresAt}
+                                    dailyUsage={current?.dailyUsage}
                                 />
+
 
                                 <ProfileForm
                                     formData={formData}

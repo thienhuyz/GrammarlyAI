@@ -2,10 +2,12 @@ const asyncHandler = require('express-async-handler');
 const OpenAI = require('openai');
 const pdfParse = require("pdf-parse");
 const mammoth = require("mammoth");
+const User = require('../models/user');
 
 const client = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
+
 
 const checkGrammar = asyncHandler(async (req, res) => {
     const { text } = req.body;
@@ -14,6 +16,22 @@ const checkGrammar = asyncHandler(async (req, res) => {
         return res.status(400).json({
             success: false,
             mes: 'Thiếu đoạn văn cần kiểm tra.',
+        });
+    }
+
+    const userId = req.user?._id;
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            mes: 'Người dùng chưa đăng nhập.',
+        });
+    }
+
+    let user = await User.findById(userId);
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            mes: 'Không tìm thấy người dùng.',
         });
     }
 
@@ -44,7 +62,6 @@ const checkGrammar = asyncHandler(async (req, res) => {
                     "In 'corrected_highlighted_html', return the FULLY CORRECTED text.",
                     "In 'corrected_highlighted_html', wrap each corrected word or segment in <span class=\"ai-correct\">...</span>.",
                     "If there are no errors, set 'corrections' to an empty array, 'highlighted_html' equal to the original text, and 'corrected_highlighted_html' equal to the original text.",
-
                 ].join(" ")
             },
             {
@@ -67,6 +84,12 @@ const checkGrammar = asyncHandler(async (req, res) => {
             raw: rawContent,
         });
     }
+
+    if (user.plan !== 'pro') {
+        user.dailyUsage.count += 1;
+    }
+
+    await user.save();
 
     return res.status(200).json({
         success: true,

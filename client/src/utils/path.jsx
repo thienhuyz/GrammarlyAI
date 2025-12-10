@@ -9,6 +9,8 @@ const path = {
     USER_MANAGEMENT: 'users',
     DASHBOARD: '',
     HISTORY: 'history',
+    PRICING: 'pricing',
+    MOMO_RETURN: 'momo-return',
 };
 
 export default path;
